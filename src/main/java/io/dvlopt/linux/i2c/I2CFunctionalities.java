@@ -15,25 +15,32 @@
  */
 
 
-package io.dvlopt.linux.i2c.internal ;
+package io.dvlopt.linux.i2c ;
 
 
-import com.sun.jna.Union ;
-
-
-
-
-public class NativeI2CSmbusData extends Union {
-
-
-    // I2C_SMBUS_BLOCK_MAX( 32 ) + 2( 1 for length + 1 for PEC)
-    //
-    public static final int SIZE = 34 ;
+import io.dvlopt.linux.i2c.I2CFunctionality ;
 
 
 
 
-    public byte   byt                      ;
-    public short  word                     ;
-    public byte[] block = new byte[ SIZE ] ;
+public class I2CFunctionalities {
+
+
+    private final int flags ;
+
+
+
+
+    I2CFunctionalities( int flags ) {
+    
+        this.flags = flags ;
+    }
+
+
+
+
+    public boolean can( I2CFunctionality functionality ) {
+    
+        return ( this.flags & functionality.value ) != 0 ;
+    }
 }

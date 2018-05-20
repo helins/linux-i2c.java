@@ -10,7 +10,7 @@ plugins {
 
 def globalName    = 'linux-i2c'
 
-def globalVersion = '0.0.0-alpha2'
+def globalVersion = '0.0.0-alpha3'
 
 def globalDesc    = 'Use the standard Linux I2C api from Java'
 
@@ -26,7 +26,6 @@ version = globalVersion
 
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

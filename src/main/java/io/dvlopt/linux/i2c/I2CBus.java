@@ -1,13 +1,32 @@
+/*
+ * Copyright 2018 Adam Helinski
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package io.dvlopt.linux.i2c ;
 
 
 import com.sun.jna.Memory                                   ;
 import com.sun.jna.NativeLong                               ;
 import com.sun.jna.Pointer                                  ;
+import com.sun.jna.ptr.LongByReference                      ;
 import io.dvlopt.linux.LinuxException                       ;
 import io.dvlopt.linux.NativeMemory                         ;
 import io.dvlopt.linux.SizeT                                ;
 import io.dvlopt.linux.i2c.I2CBlock                         ;
+import io.dvlopt.linux.i2c.I2CFunctionalities               ;
 import io.dvlopt.linux.i2c.I2CTransaction                   ;
 import io.dvlopt.linux.i2c.internal.NativeI2CSmbusData      ;
 import io.dvlopt.linux.i2c.internal.NativeI2CSmbusIoctlData ;
@@ -129,6 +148,23 @@ public class I2CBus implements AutoCloseable {
 
 
 
+    public I2CFunctionalities getFunctionalities() throws LinuxException {
+    
+        LongByReference longRef = new LongByReference() ;
+
+        if ( LinuxIO.ioctl( this.fd              ,
+                            I2C_FUNCS            ,
+                            longRef.getPointer() ) < 0 ) {
+        
+            throw new LinuxException( "Unable to get the I2C functionalities of this bus" ) ;
+        }
+
+        return new I2CFunctionalities( (int)( longRef.getValue() ) ) ;
+    }
+
+
+
+
     public void selectSlave( int address ) throws LinuxException {
 
         this.selectSlave( address ,
@@ -217,7 +253,7 @@ public class I2CBus implements AutoCloseable {
 
 
 
-    public int readByte() throws LinuxException {
+    public int readByteDirectly() throws LinuxException {
 
         this.i2cSmbusAccess( I2C_SMBUS_READ    ,
                              0                 ,
@@ -273,9 +309,9 @@ public class I2CBus implements AutoCloseable {
 
 
 
-    public int readBlock( int      command ,
-                          I2CBlock block   ,
-                          int      length  ) throws LinuxException {
+    public void readI2CBlock( int      command ,
+                              I2CBlock block   ,
+                              int      length  ) throws LinuxException {
 
         if ( length > I2CBlock.SIZE ) {
         
@@ -290,7 +326,7 @@ public class I2CBus implements AutoCloseable {
                                           : I2C_SMBUS_I2C_BLOCK_DATA   ,
                              block.memory                              ) ;
 
-        return block.readLength() ;
+        block.readLength() ;
     }
 
 
@@ -319,7 +355,7 @@ public class I2CBus implements AutoCloseable {
 
 
 
-    public void writeByte( int b ) throws LinuxException {
+    public void writeByteDirectly( int b ) throws LinuxException {
 
         this.i2cSmbusAccess( I2C_SMBUS_WRITE ,
                              b               ,
@@ -349,10 +385,11 @@ public class I2CBus implements AutoCloseable {
     public void writeWord( int command ,
                            int word    ) throws LinuxException {
     
-        this.i2cSmbusData.setShort( 0           ,
-                                    (short)word ) ;
+        NativeMemory.setUnsignedShort( this.i2cSmbusData ,
+                                       0                 ,
+                                       word              ) ;
 
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE    ,
+        this.i2cSmbusAccess( I2C_SMBUS_WRITE     ,
                              command             ,
                              I2C_SMBUS_WORD_DATA ,
                              this.i2cSmbusData   ) ;
@@ -364,25 +401,26 @@ public class I2CBus implements AutoCloseable {
     public void writeBlock( int      command ,
                             I2CBlock block   ) throws LinuxException {
     
-        this.writeBlock( command ,
-                         block   ,
-                         false   ) ;
+        block.writeLength() ;
+
+        this.i2cSmbusAccess( I2C_SMBUS_WRITE          ,
+                             command                  ,
+                             I2C_SMBUS_I2C_BLOCK_DATA ,
+                             block.memory             ) ;
     }
 
 
 
 
-    public void writeBlock( int      command   ,
-                            I2CBlock block     ,
-                            boolean  sendCount ) throws LinuxException {
+    public void writeI2CBlock( int      command   ,
+                               I2CBlock block     ) throws LinuxException {
     
         block.writeLength() ;
 
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE                        ,
-                             command                                ,
-                             sendCount ? I2C_SMBUS_BLOCK_DATA
-                                       : I2C_SMBUS_I2C_BLOCK_BROKEN ,
-                             block.memory                           ) ;
+        this.i2cSmbusAccess( I2C_SMBUS_WRITE            ,
+                             command                    ,
+                             I2C_SMBUS_I2C_BLOCK_BROKEN ,
+                             block.memory               ) ;
     }
 
 
