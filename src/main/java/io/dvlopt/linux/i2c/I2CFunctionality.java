@@ -27,7 +27,7 @@ public enum I2CFunctionality {
 
     TRANSACTIONS                   ( 0x00000001 ) ,
 
-    ADDRESSING_10_BIT              ( 0x00000002 ) ,
+    TEN_BIT_ADDRESSING             ( 0x00000002 ) ,
 
     PROTOCOL_MANGLING              ( 0x00000004 ) ,
 

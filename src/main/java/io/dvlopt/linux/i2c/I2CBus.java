@@ -183,9 +183,12 @@ public class I2CBus implements AutoCloseable {
         
             if ( this.isTenBit == false ) {
             
-                LinuxIO.ioctl( this.fd    ,
-                               I2C_TENBIT ,
-                               1          ) ;
+                if ( LinuxIO.ioctl( this.fd    ,
+                                    I2C_TENBIT ,
+                                    1          ) < 0 ) {
+                
+                    throw new LinuxException( "Unable to set 10 bit addressing" ) ;
+                }
 
                 this.isTenBit = true ;
             }
@@ -193,18 +196,52 @@ public class I2CBus implements AutoCloseable {
 
         else if ( this.isTenBit ) {
         
-            LinuxIO.ioctl( this.fd    ,
-                           I2C_TENBIT ,
-                           0          ) ;
+            if ( LinuxIO.ioctl( this.fd    ,
+                                I2C_TENBIT ,
+                                0          ) < 0 ) {
+            
+                throw new LinuxException( "Unable to set 7 bit addressing" ) ;
+            }
 
             this.isTenBit = false ;
         }
         
-        LinuxIO.ioctl( this.fd                 ,
-                       force ? I2C_SLAVE_FORCE
-                             : I2C_SLAVE       ,
-                         address  
-                       & 0xffffffffL           ) ;
+        if ( LinuxIO.ioctl( this.fd                 ,
+                            force ? I2C_SLAVE_FORCE
+                                  : I2C_SLAVE       ,
+                              address  
+                            & 0xffffffffL           ) < 0 ) {
+                            
+            throw new LinuxException( "Unable to use the given slave address" ) ;
+        }
+    }
+
+
+
+
+    public void setRetries( int nRetries ) throws LinuxException {
+
+        if ( LinuxIO.ioctl( this.fd       ,
+                            I2C_RETRIES   ,
+                              nRetries
+                            & 0xffffffffL ) < 0 ) {
+
+            throw new LinuxException( "Unable to set the number of retries" ) ;
+        }
+    }
+
+
+
+
+    public void setTimeout( int milliseconds ) throws LinuxException {
+    
+        if ( LinuxIO.ioctl( this.fd                 ,
+                            I2C_TIMEOUT             ,
+                              ( milliseconds / 10 )
+                            & 0xffffffL             ) < 0 ) {
+
+            throw new LinuxException( "Unable to set timeout" ) ;
+        }
     }
 
 
