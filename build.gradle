@@ -8,14 +8,15 @@ plugins {
 
 
 dependencies {
-    api            'io.dvlopt:linux-common:0.0.1'
-    implementation 'io.dvlopt:linux-io:0.0.1'
+    api            'io.dvlopt:linux-common:0.1.0'
+    implementation 'io.dvlopt:linux-io:0.0.3'
 }
 
 
 
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -34,4 +35,4 @@ publishing {
 
 
 group = "io.dvlopt"
-version = "0.0.0-alpha0"
+version = "0.0.0-alpha1"

@@ -1,7 +1,8 @@
 package io.dvlopt.linux.i2c ;
 
 
-import com.sun.jna.Memory ;
+import com.sun.jna.Memory           ;
+import io.dvlopt.linux.NativeMemory ;
 
 
 
@@ -28,8 +29,9 @@ public class I2CBuffer {
 
 
     public int get( int index ) {
-    
-        return ( this.memory.getByte( index ) ) & 0xffffffff ;
+
+        return NativeMemory.getUnsignedByte( this.memory ,
+                                             index       ) ;
     }
 
 
@@ -37,9 +39,10 @@ public class I2CBuffer {
 
     public I2CBuffer set( int index ,
                           int b     ) {
-    
-        this.memory.setByte( index   ,
-                             (byte)b ) ;
+
+        NativeMemory.setUnsignedByte( this.memory   ,
+                                      index         ,
+                                      b             ) ;
 
         return this ;
     }
