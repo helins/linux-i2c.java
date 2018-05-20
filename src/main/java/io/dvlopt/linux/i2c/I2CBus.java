@@ -203,7 +203,22 @@ public class I2CBus implements AutoCloseable {
         LinuxIO.ioctl( this.fd                 ,
                        force ? I2C_SLAVE_FORCE
                              : I2C_SLAVE       ,
-                       address                 ) ;
+                         address  
+                       & 0xffffffffL           ) ;
+    }
+
+
+
+
+    public void usePEC( boolean usePEC ) throws LinuxException {
+    
+        if ( LinuxIO.ioctl( this.fd     ,
+                            I2C_PEC     ,
+                            usePEC ? 1L
+                                   : 0L ) < 0 ) {
+
+            throw new LinuxException( "Unable to set or unset PEC for SMBUS operations" ) ;
+        }
     }
 
 
