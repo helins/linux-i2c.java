@@ -493,10 +493,11 @@ public class I2CBus implements AutoCloseable {
 
     public int processCall( int command ,
                             int word    ) throws LinuxException {
-    
-        this.i2cSmbusData.setShort( 0           ,
-                                    (short)word ) ;
 
+        NativeMemory.setUnsignedShort( this.i2cSmbusData ,
+                                       0                 ,
+                                       word              ) ;
+    
         this.i2cSmbusAccess( I2C_SMBUS_WRITE     ,
                              command             ,
                              I2C_SMBUS_PROC_CALL ,

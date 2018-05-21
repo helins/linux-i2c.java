@@ -97,8 +97,6 @@ public class I2CMessage {
 
 
     public I2CMessage setBuffer( I2CBuffer buffer ) {
-
-        this.buffer = buffer ;
     
         this.ptr.setPointer( NativeI2CMessage.OFFSET_BUFFER ,
                              buffer.memory                  ) ;
@@ -106,6 +104,8 @@ public class I2CMessage {
         NativeMemory.setUnsignedShort( this.ptr                       ,
                                        NativeI2CMessage.OFFSET_LENGTH ,
                                        buffer.length                  ) ;
+
+        this.buffer = buffer ;
 
         return this ;
     }

@@ -93,6 +93,8 @@ public class I2CBlock {
         NativeMemory.setUnsignedByte( this.memory ,
                                       0           ,
                                       length      ) ;
+
+        this.length = length ;
     }
 
 

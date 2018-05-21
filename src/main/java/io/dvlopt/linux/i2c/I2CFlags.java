@@ -80,4 +80,21 @@ public class I2CFlags {
 
         return this ;
     }
+
+
+
+    public boolean equals( I2CFlags flags ) {
+    
+        return this.value == flags.value ;
+    }
+
+
+
+
+    @Override
+    public boolean equals( Object o ) {
+    
+        return o instanceof I2CFlags ? this.equals( (I2CFlags)o )
+                                     : false                      ;
+    }
 }
