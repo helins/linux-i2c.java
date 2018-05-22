@@ -38,7 +38,7 @@ public class I2CFunctionalitiesTest {
 
 
     @Test
-    @DisplayName( "" )
+    @DisplayName( "Reading functionalities." )
     void can() {
     
         int value = 0 ;

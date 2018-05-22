@@ -480,9 +480,19 @@ public class I2CBus implements AutoCloseable {
 
     public void write( I2CBuffer buffer ) throws LinuxException {
     
-        if ( LinuxIO.write( this.fd                    ,
-                            buffer.memory              ,
-                            new SizeT( buffer.length ) ).intValue() < 0 ) {
+        this.write( buffer        ,
+                    buffer.length ) ;
+    }
+
+
+
+
+    public void write( I2CBuffer buffer ,
+                       int       length ) throws LinuxException {
+    
+        if ( LinuxIO.write( this.fd             ,
+                            buffer.memory       ,
+                            new SizeT( length ) ).intValue() < 0 ) {
         
             throw new LinuxException( "Unable to write I2C buffer" ) ;
         }
