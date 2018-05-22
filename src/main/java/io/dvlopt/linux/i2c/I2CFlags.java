@@ -23,6 +23,11 @@ import io.dvlopt.linux.i2c.I2CFlag ;
 
 
 
+/**
+ * Class holding flags for describing an I2C message.
+ *
+ * @see I2CMessage
+ */
 public class I2CFlags {
 
 
@@ -30,6 +35,9 @@ public class I2CFlags {
 
 
 
+    /**
+     * Basic constructor.
+     */
     public I2CFlags() {
     
         clear() ;
@@ -46,6 +54,13 @@ public class I2CFlags {
 
 
 
+    /**
+     * Is this flag set ?
+     *
+     * @param flag  The tested flag.
+     *
+     * @return  A boolean.
+     */
     public boolean isSet( I2CFlag flag ) {
     
         return ( this.value & flag.value ) > 0 ;
@@ -54,6 +69,13 @@ public class I2CFlags {
 
 
 
+    /**
+     * Sets this flag.
+     *
+     * @param flag  The flag to be set.
+     *
+     * @return  This instance.
+     */
     public I2CFlags set( I2CFlag flag ) {
 
         this.value |= flag.value ;
@@ -64,6 +86,13 @@ public class I2CFlags {
 
 
 
+    /**
+     * Unsets this flags.
+     *
+     * @param flag  The flag to be unset.
+     *
+     * @return  This instance.
+     */
     public I2CFlags unset( I2CFlag flag ) {
     
         this.value &= ~( flag.value ) ;
@@ -74,6 +103,11 @@ public class I2CFlags {
 
 
 
+    /**
+     * Unsets all flags.
+     *
+     * @return  This instance.
+     */
     public I2CFlags clear() {
     
         this.value = 0 ;
@@ -83,6 +117,13 @@ public class I2CFlags {
 
 
 
+    /**
+     * Are those two sets of flags equal ?
+     *
+     * @param flags  Another set of flags.
+     *
+     * @return  A boolean.
+     */
     public boolean equals( I2CFlags flags ) {
     
         return this.value == flags.value ;

@@ -27,6 +27,11 @@ import io.dvlopt.linux.i2c.internal.NativeI2CMessage ;
 
 
 
+/**
+ * Class representing a message in an I2C transaction.
+ *
+ * @see I2CTransaction
+ */
 public class I2CMessage {
 
 
@@ -46,6 +51,11 @@ public class I2CMessage {
 
 
 
+    /**
+     * Retrieves the address of the slave device this message is intented for.
+     *
+     * @return  The address.
+     */
     public int getAddress() {
 
         return NativeMemory.getUnsignedShort( this.ptr                        ,
@@ -55,6 +65,13 @@ public class I2CMessage {
 
 
 
+    /**
+     * Sets the address of the slave device this message is intended for.
+     *
+     * @param address The address of the slave.
+     *
+     * @return  This instance.
+     */
     public I2CMessage setAddress( int address ) {
     
         NativeMemory.setUnsignedShort( this.ptr                        ,
@@ -67,6 +84,11 @@ public class I2CMessage {
 
 
 
+    /**
+     * Retrieves the flags describing this message.
+     *
+     * @return  The flags.
+     */
     public I2CFlags getFlags() {
     
         return new I2CFlags( NativeMemory.getUnsignedShort( this.ptr                      ,
@@ -76,6 +98,13 @@ public class I2CMessage {
 
 
 
+    /**
+     * Sets the flags for describing this message.
+     *
+     * @param flags  The flags.
+     *
+     * @return  This instance.
+     */
     public I2CMessage setFlags( I2CFlags flags ) {
 
         NativeMemory.setUnsignedShort( this.ptr                      ,
@@ -88,6 +117,11 @@ public class I2CMessage {
 
 
 
+    /**
+     * Retrieves the buffer of this message.
+     *
+     * @return  The buffer.
+     */
     public I2CBuffer getBuffer() {
 
         return this.buffer ;
@@ -96,6 +130,13 @@ public class I2CMessage {
 
 
 
+    /**
+     * Sets the buffer of this message.
+     *
+     * @param buffer  The buffer.
+     *
+     * @return  This instance.
+     */
     public I2CMessage setBuffer( I2CBuffer buffer ) {
     
         this.ptr.setPointer( NativeI2CMessage.OFFSET_BUFFER ,

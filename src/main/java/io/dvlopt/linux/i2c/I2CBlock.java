@@ -25,9 +25,17 @@ import io.dvlopt.linux.i2c.internal.NativeI2CSmbusData ;
 
 
 
+/**
+ * Class representing a block of bytes for SMBUS operations.
+ * <p>
+ * Such a buffer is limited to 32 bytes.
+ */
 public class I2CBlock {
 
 
+    /**
+     * The length of a buffer.
+     */
     public static final int SIZE = NativeI2CSmbusData.SIZE - 2 ;
 
 
@@ -39,6 +47,9 @@ public class I2CBlock {
 
 
 
+    /**
+     * Allocates a block.
+     */
     public I2CBlock() {
     
         this.memory = new Memory( NativeI2CSmbusData.SIZE + 1 ) ;
@@ -49,6 +60,11 @@ public class I2CBlock {
 
 
     
+    /**
+     * Fills the block with 0.
+     *
+     * @return  This instance.
+     */
     public I2CBlock clear() {
     
         this.memory.clear() ;
@@ -61,6 +77,16 @@ public class I2CBlock {
 
 
 
+    /**
+     * Retrieves the current length of this block.
+     * <p>
+     * Setting a byte to an index adjusts the length of the block to the
+     * highest index.
+     *
+     * @return The length.
+     *
+     * @see #set( int, int )
+     */
     public int length() {
     
         return this.length ;
@@ -69,6 +95,8 @@ public class I2CBlock {
 
 
 
+    // Retrieves and syncs the length set by a native SMBUS call.
+    //
     int readLength() {
     
         this.length = NativeMemory.getUnsignedByte( this.memory ,
@@ -80,6 +108,8 @@ public class I2CBlock {
 
 
 
+    // Syncs the length for a native SMBUS call.
+    //
     void writeLength() {
 
         this.writeLength( this.length ) ;
@@ -88,6 +118,8 @@ public class I2CBlock {
 
 
 
+    // Writes and syncs the length for a native SMBUS call.
+    //
     void writeLength( int length ) {
 
         NativeMemory.setUnsignedByte( this.memory ,
@@ -100,6 +132,13 @@ public class I2CBlock {
 
 
 
+    /**
+     * Retrieves the byte at the given position.
+     *
+     * @param index  Where.
+     *
+     * @return  An unsigned byte.
+     */
     public int get( int index ) {
 
         return NativeMemory.getUnsignedByte( this.memory ,
@@ -109,6 +148,18 @@ public class I2CBlock {
 
 
 
+    /**
+     * Sets the byte at the given position.
+     * <p>
+     * The length of this block will be adjusted to reflect the highest index
+     * of a byte set by the user or by an SMBUS operation.
+     *
+     * @param index  Which one.
+     *
+     * @param b  An unsigned byte.
+     *
+     * @return  This instance.
+     */
     public I2CBlock set( int index ,
                          int b     ) {
 

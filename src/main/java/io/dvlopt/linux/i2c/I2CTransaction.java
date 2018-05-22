@@ -27,9 +27,18 @@ import io.dvlopt.linux.i2c.internal.NativeI2CMessage   ;
 
 
 
+/**
+ * Class representing an I2C transaction for carrying out several uninterrupted IO operations.
+ * <p>
+ * Sometimes, only one message per transaction is supported, which defeat the purpose of having
+ * transactions.
+ */
 public class I2CTransaction {
 
 
+    /**
+     * The maximum number of messages a single transaction can carry out in theory.
+     */
     public final static int MAX_LENGTH = 42 ;
 
 
@@ -38,11 +47,22 @@ public class I2CTransaction {
 
     private I2CMessage[] messages ;
 
+
+    /**
+     * How many messages this transaction holds.
+     */
     public final int length ;
 
 
 
 
+    /**
+     * Creates a new transaction.
+     *
+     * @param length  The number of messages.
+     *
+     * @see #MAX_LENGTH
+     */
     public I2CTransaction( int length ) {
     
         if ( length > MAX_LENGTH ) {
@@ -77,6 +97,13 @@ public class I2CTransaction {
 
 
 
+    /**
+     * Retrieves a message from this transaction.
+     *
+     * @param index  Which one.
+     *
+     * @return  The relevant message.
+     */
     public I2CMessage getMessage( int index ) {
     
         return this.messages[ index ] ;

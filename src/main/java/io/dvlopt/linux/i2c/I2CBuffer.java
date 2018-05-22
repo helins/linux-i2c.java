@@ -24,16 +24,27 @@ import io.dvlopt.linux.NativeMemory ;
 
 
 
+/**
+ * Class representing a buffer of bytes for directly reading or writing to a slave device.
+ */
 public class I2CBuffer {
 
 
     final Memory memory ;
 
+    /**
+     * The length of this buffer.
+     */
     public final int length ;
 
 
 
 
+    /**
+     * Allocates a buffer.
+     *
+     * @param length  The number of bytes.
+     */
     public I2CBuffer( int length ) {
     
         this.memory = new Memory( length ) ;
@@ -45,6 +56,13 @@ public class I2CBuffer {
 
 
 
+    /**
+     * Retrieves the byte at the given position.
+     *
+     * @param index  Which byte.
+     *
+     * @return  An unsigned byte.
+     */
     public int get( int index ) {
 
         return NativeMemory.getUnsignedByte( this.memory ,
@@ -54,6 +72,15 @@ public class I2CBuffer {
 
 
 
+    /**
+     * Sets the byte at the given position.
+     *
+     * @param index  Where.
+     *
+     * @param b  An unsigned byte.
+     *
+     * @return  This instance.
+     */
     public I2CBuffer set( int index ,
                           int b     ) {
 
@@ -67,6 +94,11 @@ public class I2CBuffer {
 
 
 
+    /**
+     * Fills the buffer with 0.
+     *
+     * @return  This instance.
+     */
     public I2CBuffer clear() {
     
         this.memory.clear() ;

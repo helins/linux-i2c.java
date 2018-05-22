@@ -23,6 +23,9 @@ import io.dvlopt.linux.i2c.I2CFunctionality ;
 
 
 
+/**
+ * Class holding the functionalities of an I2C bus.
+ */
 public class I2CFunctionalities {
 
 
@@ -39,6 +42,13 @@ public class I2CFunctionalities {
 
 
 
+    /**
+     * Can the I2C bus do this ?
+     *
+     * @param functionality  The tested functionality.
+     *
+     * @return  A boolean.
+     */
     public boolean can( I2CFunctionality functionality ) {
     
         return ( this.flags & functionality.value ) != 0 ;

@@ -20,14 +20,51 @@ package io.dvlopt.linux.i2c ;
 
 
 
+/**
+ * Enum representing a flag for describing an I2C message.
+ *
+ * @see I2CMessage
+ */
 public enum I2CFlag {
 
 
-    TEN         ( 0x00000010 ) ,
+    /**
+     * Uses 10-bit addressing scheme instead of 7-bit.
+     */
+    TEN_BIT_ADDRESSING( 0x00000010 ) ,
+
+
+    /**
+     * Is a read operation, not a write.
+     */
     READ        ( 0x00000001 ) ,
+
+
+    /**
+     * Does not issue any more START/address after the initial START/address in a combined
+     * message.
+     * <p>
+     * This is a workaround for broken I2C slave devices.
+     */
     NO_START    ( 0x00004000 ) ,
-    REV_DIR_ADDR( 0x00002000 ) ,
+
+
+    /**
+     * Sends a read flag for writes and a write flag for reads.
+     * <p>
+     * This is a workaround for broken I2C slave devices.
+     */
+    REVISE_RW_BIT( 0x00002000 ) ,
+
+    /**
+     * Ignores not acknowledge.
+     */
     IGNORE_NAK  ( 0x00001000 ) ,
+
+
+    /**
+     * Ignores read acknowledge.
+     */
     NO_READ_ACK ( 0x00000800 ) ;
 
 
