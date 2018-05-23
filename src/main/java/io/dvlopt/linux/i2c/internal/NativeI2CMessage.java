@@ -26,6 +26,9 @@ import java.util.List        ;
 
 
 
+/**
+ * Internal class kept public for JNA to work, the user should not bother about this.
+ */
 public class NativeI2CMessage extends Structure {
 
 

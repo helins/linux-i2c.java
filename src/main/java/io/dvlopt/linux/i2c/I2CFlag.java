@@ -37,7 +37,7 @@ public enum I2CFlag {
     /**
      * Is a read operation, not a write.
      */
-    READ        ( 0x00000001 ) ,
+    READ              ( 0x00000001 ) ,
 
 
     /**
@@ -46,26 +46,32 @@ public enum I2CFlag {
      * <p>
      * This is a workaround for broken I2C slave devices.
      */
-    NO_START    ( 0x00004000 ) ,
+    NO_START          ( 0x00004000 ) ,
 
 
     /**
      * Sends a read flag for writes and a write flag for reads.
      * <p>
      * This is a workaround for broken I2C slave devices.
+     * <p>
+     * Check for the <strong>{@link I2CFunctionality#PROTOCOL_MANGLING protocol mangling functionality}</strong>.
      */
-    REVISE_RW_BIT( 0x00002000 ) ,
+    REVISE_RW_BIT     ( 0x00002000 ) ,
 
     /**
      * Ignores not acknowledge.
+     * <p>
+     * Check for the <strong>{@link I2CFunctionality#PROTOCOL_MANGLING protocol mangling functionality}</strong>.
      */
-    IGNORE_NAK  ( 0x00001000 ) ,
+    IGNORE_NAK        ( 0x00001000 ) ,
 
 
     /**
      * Ignores read acknowledge.
+     * <p>
+     * Check for the <strong>{@link I2CFunctionality#PROTOCOL_MANGLING protocol mangling functionality}</strong>.
      */
-    NO_READ_ACK ( 0x00000800 ) ;
+    NO_READ_ACK       ( 0x00000800 ) ;
 
 
 
