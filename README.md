@@ -6,6 +6,10 @@ available at `/dev/i2c-X` where `X` is the number of the bus. This Java library
 proposes an idiomatic interface while trying to remain semantically close to
 what Linux offers.
 
+# Usage
+
+Read the [javadoc](https://dvlopt.github.io/doc/java/linux-i2c/index.html).
+
 ## License
 
 Licensed under the [Apache License, Version
