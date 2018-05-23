@@ -145,6 +145,23 @@ bufferResponse.get( 0 ) ;
 bus.close() ;
 ```
 
+# Testing
+
+This library has been currently tested with a Raspberry Pi 3. An [arduino
+sketch](./arduino/io_tester.io) is provided for either trying the library or
+running IO tests.
+
+For running non IO-tests :
+
+```bash
+./gradlew test
+```
+
+For running tests with IO :
+```bash
+./gradlew test -Draspduino=true
+```
+
 # References
 
 - [i2c-bus.org](https://www.i2c-bus.org/), a great website about the I2C protocol.
