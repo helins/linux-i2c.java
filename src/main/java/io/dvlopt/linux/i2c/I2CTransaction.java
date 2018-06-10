@@ -42,9 +42,16 @@ public class I2CTransaction {
     public final static int MAX_LENGTH = 42 ;
 
 
+    // Pointer to native structure.
+    //
     Memory memory         ;
+
+    // Pointer to the native array of messages.
+    //
     Memory memoryMessages ;
 
+    // Messages as java objects.
+    //
     private I2CMessage[] messages ;
 
 
@@ -59,9 +66,13 @@ public class I2CTransaction {
     /**
      * Creates a new transaction.
      *
-     * @param length  The number of messages.
+     * @param  length
+     *           Number of messages.
      *
-     * @see #MAX_LENGTH
+     * @throws IllegalArgumentException
+     *           When the request number of messages is higher than what is supported.
+     *
+     * @see    #MAX_LENGTH
      */
     public I2CTransaction( int length ) {
     
@@ -98,11 +109,12 @@ public class I2CTransaction {
 
 
     /**
-     * Retrieves a message from this transaction.
+     * Retrieves a message from this transaction for inspection of modification.
      *
-     * @param index  Which one.
+     * @param  index
+     *           Which one.
      *
-     * @return  The relevant message.
+     * @return The relevant message.
      */
     public I2CMessage getMessage( int index ) {
     

@@ -21,8 +21,8 @@ package io.dvlopt.linux.i2c ;
 import static org.junit.jupiter.api.Assertions.* ;
 
 
-import io.dvlopt.linux.LinuxException                          ;
 import io.dvlopt.linux.i2c.*                                   ;
+import java.io.IOException                                     ;
 import org.junit.jupiter.api.Disabled                          ;
 import org.junit.jupiter.api.DisplayName                       ;
 import org.junit.jupiter.api.Test                              ;
@@ -60,8 +60,8 @@ public class RaspberryArduinoTest {
 
     @Test
     @DisplayName( "Direct read using a transactions." )
-    void transactionDirectRead() throws LinuxException       ,
-                                        InterruptedException {
+    void transactionDirectRead() throws InterruptedException ,
+                                        IOException          {
 
         // Opens bus and resets arduino.
         //
@@ -99,8 +99,8 @@ public class RaspberryArduinoTest {
 
     @Test
     @DisplayName( "Single write and read command using a mono-message transactions." )
-    void transactionSingle() throws LinuxException       ,
-                                    InterruptedException {
+    void transactionSingle() throws InterruptedException ,
+                                    IOException          {
 
         // Opens bus and resets arduino.
         //
@@ -159,8 +159,8 @@ public class RaspberryArduinoTest {
 
     @Test
     @DisplayName( "Multi write and read command using mono-messages transactions." )
-    void transactionMulti() throws LinuxException       ,
-                                   InterruptedException {
+    void transactionMulti() throws InterruptedException ,
+                                   IOException          {
     
         // Opens bus and resets arduino.
         //
@@ -225,8 +225,8 @@ public class RaspberryArduinoTest {
 
     @Test
     @DisplayName( "Using SMBUS operations." )
-    void smbus() throws LinuxException       ,
-                        InterruptedException {
+    void smbus() throws InterruptedException ,
+                        IOException          {
     
         // Opens bus and resets arduino.
         //
@@ -304,5 +304,4 @@ public class RaspberryArduinoTest {
 
         bus.close() ;
     }
-
 }

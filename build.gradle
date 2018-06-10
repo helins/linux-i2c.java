@@ -10,7 +10,7 @@ plugins {
 
 def globalName    = 'linux-i2c'
 
-def globalVersion = '0.0.0'
+def globalVersion = '1.0.0'
 
 def globalDesc    = 'Use the standard Linux I2C api from the JVM'
 
@@ -31,7 +31,8 @@ repositories {
 
 
 dependencies {
-    api            'io.dvlopt:linux-common:0.1.0'
+    api            'io.dvlopt:linux-common:0.1.1'
+    implementation 'io.dvlopt:linux-errno:1.0.0'
     implementation 'io.dvlopt:linux-io:0.0.3'
     testCompile    'org.junit.jupiter:junit-jupiter-api:5.2.0'
     testRuntime    'org.junit.jupiter:junit-jupiter-engine:5.2.0'

@@ -17,7 +17,5 @@
 
 /**
  * Kept public for JNA to work, the user should no bother about this package.
- *
- * @see I2CBus
  */
 package io.dvlopt.linux.i2c.internal ;

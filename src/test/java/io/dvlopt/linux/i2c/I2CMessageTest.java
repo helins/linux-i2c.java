@@ -63,9 +63,9 @@ public class I2CMessageTest {
                       buffer                           ,
                       "Buffer should be properly set." ) ;
 
-        I2CFlags flags = new I2CFlags().set( I2CFlag.READ     )
-                                       .set( I2CFlag.TEN      )
-                                       .set( I2CFlag.NO_START ) ;
+        I2CFlags flags = new I2CFlags().set( I2CFlag.READ               )
+                                       .set( I2CFlag.TEN_BIT_ADDRESSING )
+                                       .set( I2CFlag.NO_START           ) ;
 
         message.setFlags( flags ) ;
 
