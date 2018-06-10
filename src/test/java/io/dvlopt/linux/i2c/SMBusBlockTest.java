@@ -21,25 +21,25 @@ package io.dvlopt.linux.i2c ;
 import static org.junit.jupiter.api.Assertions.* ;
 
 
-import io.dvlopt.linux.i2c.I2CBlock      ;
+import io.dvlopt.linux.i2c.SMBus         ;
 import org.junit.jupiter.api.DisplayName ;
 import org.junit.jupiter.api.Test        ;
 
 
 
 
-public class I2CBlockTest {
+public class SMBusBlockTest {
 
 
     @Test
     @DisplayName( "Getting and setting bytes." )
     void getSet() {
     
-        I2CBlock block = new I2CBlock() ;
+        SMBus.Block block = new SMBus.Block() ;
 
-        for ( int i = 0         ;
-              i < I2CBlock.SIZE ;
-              i += 1            ) {
+        for ( int i = 0            ;
+              i < SMBus.Block.SIZE ;
+              i += 1               ) {
 
             block.set( i ,
                        i ) ;
@@ -61,9 +61,9 @@ public class I2CBlockTest {
     @DisplayName( "Testing that length is being adjusted properly." )
     void length() {
     
-        final I2CBlock block = new I2CBlock()    ;
-        final int      index = I2CBlock.SIZE - 1 ;
-        final int      size  = index + 1         ;
+        final SMBus.Block block = new SMBus.Block()    ;
+        final int         index = SMBus.Block.SIZE - 1 ;
+        final int         size  = index + 1            ;
 
         assertEquals( block.length()                  ,
                       0                               ,

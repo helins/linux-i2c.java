@@ -29,11 +29,15 @@ import io.dvlopt.linux.i2c.I2CFunctionality ;
 public class I2CFunctionalities {
 
 
+    // Internal value refering to functionalities.
+    //
     private final int flags ;
 
 
 
 
+    // Package private constructor.
+    //
     I2CFunctionalities( int flags ) {
     
         this.flags = flags ;

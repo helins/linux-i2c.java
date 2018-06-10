@@ -23,14 +23,11 @@ import com.sun.jna.NativeLong                               ;
 import com.sun.jna.Pointer                                  ;
 import com.sun.jna.ptr.LongByReference                      ;
 import io.dvlopt.linux.Linux                                ;
-import io.dvlopt.linux.NativeMemory                         ;
 import io.dvlopt.linux.SizeT                                ;
 import io.dvlopt.linux.errno.Errno                          ;
-import io.dvlopt.linux.i2c.I2CBlock                         ;
 import io.dvlopt.linux.i2c.I2CFunctionalities               ;
 import io.dvlopt.linux.i2c.I2CTransaction                   ;
-import io.dvlopt.linux.i2c.internal.NativeI2CSmbusData      ;
-import io.dvlopt.linux.i2c.internal.NativeI2CSmbusIoctlData ;
+import io.dvlopt.linux.i2c.SMBus                            ;
 import io.dvlopt.linux.io.LinuxIO                           ;
 import java.io.FileNotFoundException                        ;
 import java.io.IOException                                  ;
@@ -46,7 +43,7 @@ import java.io.IOException                                  ;
  *     <li>Directly reading and writing by using <strong>{@link #read( I2CBuffer ) read}</strong> and
  *         <strong>{@link #write( I2CBuffer ) write}</strong>.</li>
  *     <li>Doing <strong>{@link #doTransaction( I2CTransaction ) transactions}</strong> (ie. uninterrupted reads and writes)</li>
- *     <li>Using SMBUS operations as defined in the standard (all the other IO functions).</li>
+ *     <li>Using SMBUS operations as defined in the standard by using the interface via the <strong>{@link #smbus smbus field}</strong>.</li>
  * </ul>
  * <p>
  * SMBUS operations are a subset of what I2C can achieve but propose common interactions. However, <strong>
@@ -69,7 +66,7 @@ public class I2CBus implements AutoCloseable {
 
 
     //
-    // IOCTL requests
+    // IOCTL requests.
     //
 
     private final static NativeLong I2C_RETRIES     = new NativeLong( 0x0701L ,
@@ -93,42 +90,12 @@ public class I2CBus implements AutoCloseable {
     private final static NativeLong I2C_RDWR        = new NativeLong( 0x0707L ,
                                                                       true    ) ;
 
-    private final static NativeLong I2C_PEC         = new NativeLong( 0x0708L ,
-                                                                      true    ) ;
-
-    private final static NativeLong I2C_SMBUS       = new NativeLong( 0x0720L ,
-                                                                      true    ) ;
-
-
-    //
-    // SMBUS operation values.
-    //
-
-    private final static byte I2C_SMBUS_READ  = 1 ; 
-    private final static byte I2C_SMBUS_WRITE = 0 ;
-
-
-    private final static byte I2C_SMBUS_QUICK            = 0 ;
-    private final static byte I2C_SMBUS_BYTE             = 1 ;
-    private final static byte I2C_SMBUS_BYTE_DATA        = 2 ;
-    private final static byte I2C_SMBUS_WORD_DATA        = 3 ;
-    private final static byte I2C_SMBUS_PROC_CALL        = 4 ;
-    private final static byte I2C_SMBUS_BLOCK_DATA       = 5 ;
-    private final static byte I2C_SMBUS_I2C_BLOCK_BROKEN = 6 ;
-    private final static byte I2C_SMBUS_BLOCK_PROC_CALL  = 7 ;
-    private final static byte I2C_SMBUS_I2C_BLOCK_DATA   = 8 ;
-
 
 
 
     // File descriptor associated with the bus.
     //
-    private final int fd ;
-
-    // Reusable native structures needed for IOCTL calls.
-    //
-    private final Memory i2cSmbusIoctlData ;
-    private final Memory i2cSmbusData      ;
+    final int fd ;
 
     // Bookkeeping current addressing mode.
     //
@@ -136,6 +103,11 @@ public class I2CBus implements AutoCloseable {
 
     // Bookkeeping current state.
     private boolean isClosed = false ;
+
+    /**
+     * For executing SMBus operations using this I2C bus.
+     */
+    final public SMBus smbus ; 
 
 
 
@@ -169,12 +141,8 @@ public class I2CBus implements AutoCloseable {
      *           When an unplanned error occured.
      */
     public I2CBus( String path ) throws IOException {
-    
-        this.i2cSmbusIoctlData = new Memory( NativeI2CSmbusIoctlData.SIZE ) ;
-        this.i2cSmbusData      = new Memory( NativeI2CSmbusData.SIZE )      ;
 
-        this.i2cSmbusIoctlData.clear() ;
-        this.i2cSmbusData.clear()      ;
+        this.smbus = new SMBus( this ) ;
 
         this.fd = LinuxIO.open64( path           ,
                                   LinuxIO.O_RDWR ) ;
@@ -218,7 +186,7 @@ public class I2CBus implements AutoCloseable {
 
     // Throws an IllegalStateException is the bus has been closed.
     //
-    private void guardClosed() {
+    void guardClosed() {
     
         if ( this.isClosed ) {
         
@@ -231,7 +199,7 @@ public class I2CBus implements AutoCloseable {
 
     // Retrieves the current errno value and throws an exception if a generic error is recognized or simple returns the value.
     //
-    private static int getErrno() throws IOException {
+    static int getErrno() throws IOException {
     
         final int errno = Linux.getErrno() ;
 
@@ -460,264 +428,6 @@ public class I2CBus implements AutoCloseable {
 
 
     /**
-     * Enables or disables packet error checking for SMBUS commands.
-     * <p>
-     * Is ignored unless the underlying driver provides this <strong>{@link #getFunctionalities() functionality}</strong>.
-     * <p>
-     * Slave devices do not necessarely support this feature either.
-     *
-     * @param  usePEC
-     *           Should PEC be enabled ?
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void usePEC( boolean usePEC ) throws IOException {
-    
-        this.guardClosed() ;
-
-        if ( LinuxIO.ioctl( this.fd     ,
-                            I2C_PEC     ,
-                            usePEC ? 1L
-                                   : 0L ) < 0 ) {
-
-            throw new IOException( "Native error while setting PEC : errno " + getErrno() ) ;
-        }
-    }
-
-
-
-
-    // Performs an SMBUS command.
-    //
-    private int i2cSmbusAccess( byte    readWrite ,
-                                int     command   ,
-                                int     size      ,
-                                Pointer data      ) throws IOException {
-
-        this.i2cSmbusIoctlData.setByte( NativeI2CSmbusIoctlData.OFFSET_READ_WRITE ,
-                                        readWrite                                 ) ;
-
-        this.i2cSmbusIoctlData.setByte( NativeI2CSmbusIoctlData.OFFSET_COMMAND ,
-                                        (byte)command                          ) ;
-
-        this.i2cSmbusIoctlData.setInt( NativeI2CSmbusIoctlData.OFFSET_SIZE ,
-                                       size                                ) ;
-
-        this.i2cSmbusIoctlData.setPointer( NativeI2CSmbusIoctlData.OFFSET_DATA ,
-                                           data                                ) ;
-
-        int result = LinuxIO.ioctl( this.fd                ,
-                                    I2C_SMBUS              ,
-                                    this.i2cSmbusIoctlData ) ;
-
-        if ( result < 0 ) {
-        
-            throw new IOException( "Native error during SMBUS operation : errno " + getErrno() ) ;
-        }
-
-        return result ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation sending only the READ or WRITE bit, no data is carried.
-     *
-     * @param  isWrite
-     *           True if the WRITE bit must be set.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void quick( boolean isWrite ) throws IOException {
-
-        this.guardClosed() ;
-
-        this.i2cSmbusAccess( isWrite ? I2C_SMBUS_WRITE
-                                     : I2C_SMBUS_READ  ,
-                             0                         ,
-                             I2C_SMBUS_QUICK           ,
-                             null                      ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation reading a byte without a command.
-     *
-     * @return Unsigned byte received from the slave.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int readByteDirectly() throws IOException {
-
-        this.guardClosed() ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_READ    ,
-                             0                 ,
-                             I2C_SMBUS_BYTE    ,
-                             this.i2cSmbusData ) ;
-
-        return NativeMemory.getUnsignedByte( this.i2cSmbusData ,
-                                             0                 ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation reading a byte after specifying a command.
-     *
-     * @param command
-     *          AKA "register".
-     *
-     * @return Unsigned byte received from the slave.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int readByte( int command ) throws IOException {
-
-        this.guardClosed() ;
-    
-        this.i2cSmbusAccess( I2C_SMBUS_READ      ,
-                             command             ,
-                             I2C_SMBUS_BYTE_DATA ,
-                             this.i2cSmbusData   ) ;
-
-        return NativeMemory.getUnsignedByte( this.i2cSmbusData ,
-                                             0                 ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation reading a short after specifying a command.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @return Unsigned short received from the slave.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int readWord( int command ) throws IOException {
-
-        this.guardClosed() ;
-    
-        this.i2cSmbusAccess( I2C_SMBUS_READ      ,
-                             command             ,
-                             I2C_SMBUS_WORD_DATA ,
-                             this.i2cSmbusData   ) ;
-
-        return NativeMemory.getUnsignedShort( this.i2cSmbusData ,
-                                              0                 ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation reading several bytes after specifying a command.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  block
-     *           Block of bytes the answer will be written to.
-     *
-     * @return Number of bytes read.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int readBlock( int      command ,
-                          I2CBlock block   ) throws IOException {
-
-        this.guardClosed() ;
-    
-        this.i2cSmbusAccess( I2C_SMBUS_READ       ,
-                             command              ,
-                             I2C_SMBUS_BLOCK_DATA ,
-                             block.memory         ) ;
-
-        return block.readLength() ;
-    }
-
-
-
-
-    /**
-     * SMBUS-like operation reading several bytes after specifying a command where the length
-     * is part of the message.
-     * <p>
-     * This operation is not in the SMBUS standard but is often supported nonetheless.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  block
-     *           Block of bytes the answer will be written to.
-     *
-     * @param  length
-     *           How many bytes should be read.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void readI2CBlock( int      command ,
-                              I2CBlock block   ,
-                              int      length  ) throws IOException {
-
-        this.guardClosed() ;
-
-        if ( length > I2CBlock.SIZE ) {
-        
-            throw new IllegalArgumentException( "Too many bytes requested." ) ;
-        }
-    
-        block.writeLength( length ) ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_READ                            ,
-                             command                                   ,
-                             length == 32 ? I2C_SMBUS_I2C_BLOCK_BROKEN
-                                          : I2C_SMBUS_I2C_BLOCK_DATA   ,
-                             block.memory                              ) ;
-
-        block.readLength() ;
-    }
-
-
-
-
-    /**
      * Directly reads bytes from the slave device (length is specified by the buffer).
      *
      * @param  buffer
@@ -772,168 +482,6 @@ public class I2CBus implements AutoCloseable {
 
 
     /**
-     * SMBUS operation writing a byte without a command.
-     *
-     * @param  b
-     *           Unsigned byte that needs to be sent.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void writeByteDirectly( int b ) throws IOException {
-
-        this.guardClosed() ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE ,
-                             b               ,
-                             I2C_SMBUS_BYTE  ,
-                             null            ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation writing a byte after specifying a command.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  b
-     *           Unsigned byte that needs to be sent.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void writeByte( int command ,
-                           int b       ) throws IOException {
-
-        this.guardClosed() ;
-
-        NativeMemory.setUnsignedByte( this.i2cSmbusData ,
-                                      0                 ,
-                                      b                 ) ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE     ,
-                             command             ,
-                             I2C_SMBUS_BYTE_DATA ,
-                             this.i2cSmbusData   ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation writing a short after specifying a command.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  word
-     *           Unsigned short that needs to be sent.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void writeWord( int command ,
-                           int word    ) throws IOException {
-    
-        this.guardClosed() ;
-
-        NativeMemory.setUnsignedShort( this.i2cSmbusData ,
-                                       0                 ,
-                                       word              ) ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE     ,
-                             command             ,
-                             I2C_SMBUS_WORD_DATA ,
-                             this.i2cSmbusData   ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS operation writing several bytes after specifying a command.
-     * <p>
-     * After the command byte, the master also sends a byte count, how many bytes
-     * will be written.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  block
-     *           Block of bytes to write.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void writeBlock( int      command ,
-                            I2CBlock block   ) throws IOException {
-    
-        this.guardClosed() ;
-
-        block.writeLength() ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE          ,
-                             command                  ,
-                             I2C_SMBUS_I2C_BLOCK_DATA ,
-                             block.memory             ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS-like operation writing several bytes after specifying a command where the length
-     * is part of the message.
-     * <p>
-     * This operation is not in the SMBUS standard but is often supported nonetheless.
-     * <p>
-     * Unlike <strong>{@link #writeBlock( int, I2CBlock ) writeBlock}</strong>, this operation
-     * does not send a byte count after the command.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  block
-     *           Block of bytes to write.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public void writeI2CBlock( int      command   ,
-                               I2CBlock block     ) throws IOException {
-    
-        this.guardClosed() ;
-
-        block.writeLength() ;
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE            ,
-                             command                    ,
-                             I2C_SMBUS_I2C_BLOCK_BROKEN ,
-                             block.memory               ) ;
-    }
-
-
-
-
-    /**
      * Directly writes bytes to the slave device (length is specified by the buffer).
      *
      * @param  buffer
@@ -982,128 +530,5 @@ public class I2CBus implements AutoCloseable {
         
             throw new IOException( "Native error while writing I2C buffer : errno " + getErrno() ) ;
         }
-    }
-
-
-
-
-    /**
-     * SMBUS RPC-like operation, writing a short after specifying a command and then
-     * reading the answer.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  word
-     *           Unsigned short to be sent.
-     *
-     * @return Unsigned short given back by the slave.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int processCall( int command ,
-                            int word    ) throws IOException {
-
-        this.guardClosed() ;
-
-        NativeMemory.setUnsignedShort( this.i2cSmbusData ,
-                                       0                 ,
-                                       word              ) ;
-    
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE     ,
-                             command             ,
-                             I2C_SMBUS_PROC_CALL ,
-                             this.i2cSmbusData   ) ;
-
-        return NativeMemory.getUnsignedShort( this.i2cSmbusData ,
-                                              0                 ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS RPC-like operation, writing several bytes after specifying a command and then
-     * reading several bytes as an answer.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  block
-     *           Block of bytes to write, also where the answer will be written to.
-     *
-     * @return Number of bytes read.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int blockProcessCall( int      command ,
-                                 I2CBlock block   ) throws IOException {
-    
-        return this.blockProcessCall( command ,
-                                      block   ,
-                                      block   ) ;
-    }
-
-
-
-
-    /**
-     * SMBUS RPC-like operation, writing several bytes after specifying a command and then
-     * reading several bytes as an answer.
-     *
-     * @param  command
-     *           AKA "register".
-     *
-     * @param  blockWrite
-     *           Block of bytes to write.
-     *
-     * @param  blockRead
-     *           Block of bytes the answer will be written to (can be the same as <strong>blockWrite</strong>
-     *           if it can be overwritten).
-     *
-     * @return Number of bytes read.
-     *
-     * @throws IllegalStateException
-     *           When the I2C bus has been closed.
-     *
-     * @throws IOException
-     *           When the bus is not a proper I2C bus or an unplanned error occured.
-     */
-    public int blockProcessCall( int      command    ,
-                                 I2CBlock blockWrite ,
-                                 I2CBlock blockRead  ) throws IOException {
-
-        I2CBlock block ;
-
-        blockWrite.writeLength() ;
-
-        if ( blockWrite == blockRead ) {
-        
-            block = blockWrite ;
-        }
-
-        else {
-
-            NativeMemory.copy( blockWrite.memory ,
-                               blockRead.memory  ) ;
-
-            block = blockRead ;
-        }
-    
-
-        this.i2cSmbusAccess( I2C_SMBUS_WRITE           ,
-                             command                   ,
-                             I2C_SMBUS_BLOCK_PROC_CALL ,
-                             block.memory              ) ;
-
-        return block.readLength() ;
     }
 }

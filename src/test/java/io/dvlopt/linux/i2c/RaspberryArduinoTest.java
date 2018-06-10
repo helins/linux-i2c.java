@@ -71,7 +71,7 @@ public class RaspberryArduinoTest {
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeByteDirectly( COMMAND_RESET ) ;
+        bus.smbus.writeByteDirectly( COMMAND_RESET ) ;
 
         // Direct read.
         //
@@ -110,7 +110,7 @@ public class RaspberryArduinoTest {
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeByteDirectly( COMMAND_RESET ) ;
+        bus.smbus.writeByteDirectly( COMMAND_RESET ) ;
 
         // Single write.
         //
@@ -170,7 +170,7 @@ public class RaspberryArduinoTest {
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeByteDirectly( COMMAND_RESET ) ;
+        bus.smbus.writeByteDirectly( COMMAND_RESET ) ;
 
         // Multi write.
         //
@@ -178,7 +178,7 @@ public class RaspberryArduinoTest {
 
         I2CBuffer bufferWrite = new I2CBuffer( 7 ) ;
 
-        bufferWrite.set( 0                     ,
+        bufferWrite.set( 0                   ,
                          COMMAND_MULTI_WRITE ) ;
 
         for ( int i = 1 ;
@@ -197,7 +197,7 @@ public class RaspberryArduinoTest {
 
         // Multi read.
         //
-        bus.writeByteDirectly( COMMAND_MULTI_READ ) ;
+        bus.smbus.writeByteDirectly( COMMAND_MULTI_READ ) ;
 
         I2CTransaction trxRead = new I2CTransaction( 1 ) ;
 
@@ -236,38 +236,38 @@ public class RaspberryArduinoTest {
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeByteDirectly( COMMAND_RESET ) ;
+        bus.smbus.writeByteDirectly( COMMAND_RESET ) ;
 
         // Direct read.
         //
         Thread.sleep( WAIT_MS ) ;
 
         assertEquals( 42                                           ,
-                      bus.readByteDirectly()                       ,
+                      bus.smbus.readByteDirectly()                 ,
                       "Reading a byte directly should provide 42." ) ;
 
         // Single write.
         //
-        I2CBlock block = new I2CBlock() ;
+        SMBus.Block block = new SMBus.Block() ;
 
         block.set( 0   ,
                    246 ) ;
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeI2CBlock( COMMAND_SINGLE_WRITE ,
-                           block                ) ;
+        bus.smbus.writeI2CBlock( COMMAND_SINGLE_WRITE ,
+                                 block                ) ;
 
         // Single read.
         //
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeByteDirectly( COMMAND_SINGLE_READ ) ;
+        bus.smbus.writeByteDirectly( COMMAND_SINGLE_READ ) ;
 
         Thread.sleep( WAIT_MS ) ;
 
         assertEquals( 246                                   ,
-                      bus.readByteDirectly()                ,
+                      bus.smbus.readByteDirectly()          ,
                       "Reading the byte that has been set." ) ;
 
         // Multi write.
@@ -283,15 +283,15 @@ public class RaspberryArduinoTest {
 
         Thread.sleep( WAIT_MS ) ;
 
-        bus.writeI2CBlock( COMMAND_MULTI_WRITE ,
-                           block               ) ;
+        bus.smbus.writeI2CBlock( COMMAND_MULTI_WRITE ,
+                                 block               ) ;
 
         // Direct multi read.
         //
         I2CBuffer buffer = new I2CBuffer( bytes.length ) ;
 
         Thread.sleep( WAIT_MS ) ;
-        bus.writeByteDirectly( COMMAND_MULTI_READ ) ;
+        bus.smbus.writeByteDirectly( COMMAND_MULTI_READ ) ;
 
         Thread.sleep( WAIT_MS ) ;
         bus.read( buffer ) ;
