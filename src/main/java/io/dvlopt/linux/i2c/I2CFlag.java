@@ -76,11 +76,15 @@ public enum I2CFlag {
 
 
 
+    // Internal value of the flag.
+    //
     final int value ;
 
 
 
 
+    // Private constructor.
+    //
     private I2CFlag( int value ) {
     
         this.value = value ;

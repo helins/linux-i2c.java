@@ -53,7 +53,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can use packet error checking in SMBUS operations.
+     * Can use packet error checking in SMBus operations.
      *
      * @see SMBus#usePEC( boolean )
      */
@@ -61,7 +61,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS quick operation.
+     * Can do SMBus quick operation.
      *
      * @see SMBus#quick( boolean )
      */
@@ -69,7 +69,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS read byte directly.
+     * Can do SMBus read byte directly.
      *
      * @see SMBus#readByteDirectly()
      */
@@ -77,7 +77,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS read byte.
+     * Can do SMBus read byte.
      *
      * @see SMBus#readByte( int )
      */
@@ -85,7 +85,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS read word.
+     * Can do SMBus read word.
      *
      * @see SMBus#readWord( int )
      */
@@ -93,7 +93,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS read block.
+     * Can do SMBus read block.
      *
      * @see SMBus#readBlock( int, SMBus.Block )
      */
@@ -101,7 +101,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS read I2C block.
+     * Can do SMBus read I2C block.
      *
      * @see SMBus#readI2CBlock( int, SMBus.Block, int )
      */
@@ -109,7 +109,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS write byte directly.
+     * Can do SMBus write byte directly.
      *
      * @see SMBus#writeByteDirectly( int )
      */
@@ -117,7 +117,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS write byte.
+     * Can do SMBus write byte.
      *
      * @see SMBus#writeByte( int, int )
      */
@@ -125,7 +125,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS write word.
+     * Can do SMBus write word.
      *
      * @see SMBus#writeWord( int, int )
      */
@@ -133,7 +133,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS write block.
+     * Can do SMBus write block.
      *
      * @see SMBus#writeBlock( int, SMBus.Block )
      */
@@ -141,7 +141,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS I2C write block.
+     * Can do SMBus I2C write block.
      *
      * @see SMBus#writeI2CBlock( int, SMBus.Block )
      */
@@ -149,7 +149,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS process call.
+     * Can do SMBus process call.
      *
      * @see SMBus#processCall( int, int )
      */
@@ -157,7 +157,7 @@ public enum I2CFunctionality {
 
 
     /**
-     * Can do SMBUS block process call.
+     * Can do SMBus block process call.
      *
      * @see SMBus#blockProcessCall( int, SMBus.Block, SMBus.Block )
      */

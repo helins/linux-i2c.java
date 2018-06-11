@@ -30,6 +30,8 @@ import io.dvlopt.linux.NativeMemory ;
 public class I2CBuffer {
 
 
+    // Pointer to native structure.
+    //
     final Memory memory ;
 
     /**

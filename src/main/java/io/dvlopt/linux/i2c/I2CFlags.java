@@ -31,6 +31,8 @@ import io.dvlopt.linux.i2c.I2CFlag ;
 public class I2CFlags {
 
 
+    // Internal value holding flags.
+    //
     int value ;
 
 
@@ -46,6 +48,8 @@ public class I2CFlags {
 
 
 
+    // Private constructor.
+    //
     I2CFlags( int value ) {
     
         this.value = value ;
@@ -57,9 +61,10 @@ public class I2CFlags {
     /**
      * Is this flag set ?
      *
-     * @param flag  The tested flag.
+     * @param flag
+     *          Tested flag.
      *
-     * @return  A boolean.
+     * @return True if the flag is set.
      */
     public boolean isSet( I2CFlag flag ) {
     
@@ -72,9 +77,10 @@ public class I2CFlags {
     /**
      * Sets this flag.
      *
-     * @param flag  The flag to be set.
+     * @param  flag
+     *           Flag to be set.
      *
-     * @return  This instance.
+     * @return This instance.
      */
     public I2CFlags set( I2CFlag flag ) {
 
@@ -89,7 +95,8 @@ public class I2CFlags {
     /**
      * Unsets this flags.
      *
-     * @param flag  The flag to be unset.
+     * @param  flag
+     *           Flag to be unset.
      *
      * @return  This instance.
      */
@@ -106,7 +113,7 @@ public class I2CFlags {
     /**
      * Unsets all flags.
      *
-     * @return  This instance.
+     * @return This instance.
      */
     public I2CFlags clear() {
     
@@ -120,9 +127,10 @@ public class I2CFlags {
     /**
      * Are those two sets of flags equal ?
      *
-     * @param flags  Another set of flags.
+     * @param  flags
+     *           Another set of flags.
      *
-     * @return  A boolean.
+     * @return True of equal.
      */
     public boolean equals( I2CFlags flags ) {
     

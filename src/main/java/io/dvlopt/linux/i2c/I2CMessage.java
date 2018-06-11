@@ -35,14 +35,21 @@ import io.dvlopt.linux.i2c.internal.NativeI2CMessage ;
 public class I2CMessage {
 
 
+    // Pointer to the native structure.
+    //
     Pointer ptr ;
 
+    // Associated I2C buffer.
+    //
     private I2CBuffer buffer ;
 
 
 
 
 
+    // Private constructor.
+    // I2C messages can only be obtained through a transaction.
+    //
     I2CMessage( Pointer ptr ) {
     
         this.ptr = ptr ;
