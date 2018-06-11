@@ -280,7 +280,7 @@ public class I2CBus implements AutoCloseable {
      * Selects an available slave device using a regular 7-bit address.
      *
      * @param  address
-     *           1ddress of the needed slave.
+     *           Address of the needed slave.
      *
      * @throws IllegalStateException
      *           When the I2C bus has been closed.
@@ -307,7 +307,7 @@ public class I2CBus implements AutoCloseable {
      * slave and has no effect on <strong>{@link #doTransaction(I2CTransaction) transactions}</strong>.
      *
      * @param  address
-     *           1ddress of the needed slave.
+     *           address of the needed slave.
      *
      * @param  force
      *           Should the slave be selected even if it is already used somewhere else ?
