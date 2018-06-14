@@ -8,7 +8,8 @@ what Linux offers.
 
 # Usage
 
-Read the [javadoc](https://dvlopt.github.io/doc/java/linux-i2c/index.html).
+Read the
+[javadoc](https://dvlopt.github.io/doc/java/io.dvlopt/linux-i2c/index.html).
 
 ## In short
 
