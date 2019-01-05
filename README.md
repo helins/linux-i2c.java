@@ -6,6 +6,8 @@ available at `/dev/i2c-X` where `X` is the number of the bus. This Java library
 proposes an idiomatic interface while trying to remain semantically close to
 what Linux offers.
 
+Here is a [Clojure wrapper](https://github.com/dvlopt/linux.i2c.clj).
+
 # Usage
 
 Read the
