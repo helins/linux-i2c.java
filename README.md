@@ -1,4 +1,11 @@
-# linux-i2c
+# Linux-I2C
+
+[![Maven
+Central](https://maven-badges.herokuapp.com/maven-central/io.helins/linux-i2c/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.helins/linux-i2c)
+
+[![Javadoc](https://javadoc.io/badge2/io.helins/linux-i2c/javadoc.svg)](https://javadoc.io/doc/io.helins/linux-i2c)
+
+![CircleCI](https://circleci.com/gh/helins/linux-i2c.java.svg?style=shield)
 
 The Linux kernel provides a standard API for acting as an
 [I2C](https://en.wikipedia.org/wiki/I%C2%B2C) master. Typically, a bus is
@@ -6,24 +13,29 @@ available at `/dev/i2c-X` where `X` is the number of the bus. This Java library
 proposes an idiomatic interface while trying to remain semantically close to
 what Linux offers.
 
-Here is a [Clojure wrapper](https://github.com/dvlopt/linux.i2c.clj).
+Here is a [Clojure wrapper](https://github.com/helins/linux.i2c.clj).
 
-# Usage
+
+## Usage
+
+This is an overview.
 
 Read the
-[javadoc](https://dvlopt.github.io/doc/java/io.dvlopt/linux-i2c/index.html).
+[javadoc](https://javadoc.io/doc/io.helins/linux-i2c) for more details.
 
-## In short
+
+### In short
 
 Those examples are meant to be short (no error checking).
 
 ```java
-import io.dvlopt.linux.i2c.* ;
+import io.helins.linux.i2c.* ;
 
 I2CBus bus = new I2CBus( "/dev/i2c-1" ) ;
 ```
 
-### Find out what a bus can do
+
+#### Find out what a bus can do
 
 ```java
 I2CFunctionalities functionalities = bus.getFunctionalities() ;
@@ -33,7 +45,8 @@ bus.can( I2CFunctionality.TRANSACTIONS ) ;
 bus.can( I2CFunctionality.READ_BYTE ) ;
 ```
 
-### Directly read or write an arbitrary amount of bytes
+
+#### Directly read or write an arbitrary amount of bytes
 
 ```java
 // Selects slave device with address 0x42.
@@ -55,7 +68,8 @@ bus.read( buffer ,
 buffer.get( 0 ) ;
 ```
 
-### SMBUS operations
+
+#### SMBUS operations
 
 SMBUS is sort of a subset of I2C. Not every master of slave device support all
 those features.
@@ -107,7 +121,8 @@ int word = bus.processCall( 66, 345 ) ;
 int nBytes = bus.blockProcessCall( 66, blockWrite, blockRead ) ;
 ```
 
-### I2C transactions
+
+#### I2C transactions
 
 Not every device support doing uninterrupted sequences of reads and/or writes,
 and some only support 1 message per transaction which defeats the purpose of
@@ -142,30 +157,33 @@ bus.doTransaction( trx ) ;
 bufferResponse.get( 0 ) ; 
 ```
 
-### Finally
+
+#### Finally
 
 ```java
 bus.close() ;
 ```
 
-# Testing
 
-This library has been currently tested with a Raspberry Pi 3. An [arduino
-sketch](./arduino/io_tester.io) is provided for either trying the library or
+## Tests
+
+This library has been currently tested with a Raspberry Pi 3. An [Arduino
+sketch](../tree/main/arduino] is provided for either trying the library or
 running IO tests.
 
 For running non IO-tests :
 
 ```bash
-./gradlew test
+$ ./bin/test
 ```
 
-For running tests with IO :
+For running tests with a connected Arduino :
 ```bash
-./gradlew test -Draspduino=true
+$ ./bin/test_with_io
 ```
 
-# References
+
+## References
 
 - [i2c-bus.org](https://www.i2c-bus.org/), a great website about the I2C protocol.
 - [Short documentation about the native API](https://www.kernel.org/doc/Documentation/i2c/dev-interface).
@@ -179,9 +197,9 @@ For running tests with IO :
 - [Native source regarding flags and
     functionalities](https://code.woboq.org/linux/linux/include/uapi/linux/i2c.h.html).
 
+
 ## License
 
-Licensed under the [Apache License, Version
-2.0](http://www.apache.org/licenses/LICENSE-2.0).
-
 Copyright © 2018 Adam Helinski
+
+Licensed under the term of the Mozilla Public License 2.0, see LICENSE.
