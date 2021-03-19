@@ -9,7 +9,7 @@ plugins {
 
 def globalName    = "linux-i2c"
 
-def globalVersion = "1.0.1"
+def globalVersion = "1.0.2"
 
 def globalDesc    = "Use the standard Linux I2C API from the JVM"
 
@@ -50,7 +50,7 @@ java {
 
 tasks.jar {
     manifest {
-        attributes("Automatic-Module-Name": "io.helins.linuxi.io")
+        attributes("Automatic-Module-Name": "io.helins.linux.i2c")
     }
 }
 
