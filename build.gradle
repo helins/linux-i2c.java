@@ -1,25 +1,24 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.7.3'
-    id 'com.github.johnrengelman.shadow' version '2.0.4'
+    id "java-library"
+    id "maven-publish"
+    id "signing"
 }
 
 
 
 
-def globalName    = 'linux-i2c'
+def globalName    = "linux-i2c"
 
-def globalVersion = '1.0.0'
+def globalVersion = "1.0.1"
 
-def globalDesc    = 'Use the standard Linux I2C api from the JVM'
+def globalDesc    = "Use the standard Linux I2C API from the JVM"
 
-def globalUrl     = 'https://github.com/dvlopt/linux-i2c.java'
-
-
+def globalUrl     = "https://github.com/helins/linux-i2c.java"
 
 
-group   = 'io.dvlopt'
+
+
+group   = "io.helins"
 version = globalVersion
 
 
@@ -31,11 +30,36 @@ repositories {
 
 
 dependencies {
-    api            'io.dvlopt:linux-common:0.1.1'
-    implementation 'io.dvlopt:linux-errno:1.0.0'
-    implementation 'io.dvlopt:linux-io:0.0.3'
-    testCompile    'org.junit.jupiter:junit-jupiter-api:5.2.0'
-    testRuntime    'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+    api            "io.helins:linux-common:0.1.4"
+    implementation "io.helins:linux-errno:1.0.2"
+    implementation "io.helins:linux-io:0.0.4"
+    testCompile    "org.junit.jupiter:junit-jupiter-api:5.2.0"
+    testRuntime    "org.junit.jupiter:junit-jupiter-engine:5.2.0"
+}
+
+
+
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
+
+
+tasks.jar {
+    manifest {
+        attributes("Automatic-Module-Name": "io.helins.linuxi.io")
+    }
+}
+
+
+
+
+javadoc {
+    options.links( "https://docs.oracle.com/en/java/javase/11/docs/api/" ,
+                   "https://javadoc.io/doc/io.helins/linux-common"       )
 }
 
 
@@ -47,96 +71,69 @@ test {
 
     testLogging {
 
-        events 'passed'  ,
-               'skipped' ,
-               'failed'
+        events "passed"  ,
+               "skipped" ,
+               "failed"
     }
 
-    systemProperty( 'raspduino'                       ,
-                    System.getProperty( 'raspduino' ) ) ;
+    systemProperty( "raspduino"                       ,
+                    System.getProperty( "raspduino" ) ) ;
 }
 
 
 
 
-task sourcesJar( type:      Jar     ,
-                 dependsOn: classes ) {
-
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-
-
-
-task javadocJar( type:      Jar     ,
-                 dependsOn: javadoc ) {
-
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-
-
-
-def pomConfig = {
-
-
-    licenses {
-        license {
-            name 'Apache License, Version 2.0'
-            url  'http://www.apache.org/licenses/LICENSE-2.0'
-        }
-    }
-
-
-    developers {
-        developer {
-            name            'Adam Helinski'
-            email           'adam@dvlopt.io'
-            organization    'Dvlopt'
-            organizationUrl 'http://dvlopt.io'
-        }
-    }
-
-
-    scm {
-        connection          'scm:git:git://github.com/dvlopt/linux-i2c.java.git'
-        developerConnection 'scm:git:ssh://github.com/dvlopt/linux-i2c.java.git'
-        url                 globalUrl
-    }
-}
-
-
+// Publishing to Maven
 
 
 publishing {
-    publications {
-        mavenJava( MavenPublication ) {
 
-            groupId    group
-            artifactId 'linux-i2c'
-            version    globalVersion
+
+    publications {
+        LibMaven( MavenPublication ) {
 
             from components.java
 
-            artifact sourcesJar
-            artifact javadocJar
+
+            pom {
+
+
+                name        = globalName
+                description = globalDesc
+                url         = globalUrl
+
+                licenses {
+                     license {
+                         name = "Mozilla Public License Version 2.0"
+                         url  = "https://www.mozilla.org/en-US/MPL/2.0/"
+                     }
+                }
+
+
+                developers {
+                    developer {
+                        name            = "Adam Helinski"
+                        email           = "adam@helins.io"
+                        organizationUrl = "http://www.helins.io"
+                    }
+                }
             
-            pom.withXml {
-                def root = asNode()
-
-                root.appendNode( 'name'     ,
-                                 globalName )
-
-                root.appendNode( 'description' ,
-                                 globalDesc    )
-
-                root.appendNode( 'url'     ,
-                                 globalUrl )
-
-                root.children().last() + pomConfig
+            
+                scm {
+                    connection          = "scm:git:git://github.com/helins/linux-i2c.java.git"
+                    developerConnection = "scm:git:ssh://github.com/helins/linux-i2c.java.git"
+                    url                 = globalUrl
+                }
             }
+        }
+    }
+
+
+    repositories {
+        maven {
+            credentials( PasswordCredentials )
+            name = "sonatype"
+            url  = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
         }
     }
 }
@@ -144,39 +141,6 @@ publishing {
 
 
 
-bintray {
-    user = project.hasProperty( 'bintrayUser' ) ? project.property( 'bintrayUser' )
-                                                : System.getenv( 'BINTRAY_USER' )
-    key  = project.hasProperty( 'bintrayKey' ) ? project.property( 'bintrayKey' ) 
-                                               : System.getenv( 'BINTRAY_KEY' )
-
-    publications = [ 'mavenJava' ]
-
-    pkg {
-        repo                  = 'maven'
-        name                  = globalName
-        desc                  = globalDesc
-        licenses              = [ 'Apache-2.0' ]
-        websiteUrl            = globalUrl
-        vcsUrl                = 'https://github.com/dvlopt/linux-i2c.java.git'
-        labels                = [ 'java', 'jna', 'native', 'linux', 'i2c', 'standard' ]
-        publicDownloadNumbers = true
-        
-        version {
-            name   = globalVersion
-            vcsTag = globalVersion
-
-            gpg {
-                sign = true
-            }
-        }
-    }
-}
-
-
-
-
-javadoc {
-    options.links( 'https://docs.oracle.com/javase/8/docs/api/'      ,
-                   'https://dvlopt.github.io/doc/java/linux-common/' )
+signing {
+    sign publishing.publications.LibMaven
 }
