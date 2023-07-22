@@ -143,9 +143,9 @@ public class I2CBus implements AutoCloseable {
 
             switch ( errno ) {
             
-                case Errno.EACCES : throw new FileNotFoundException( "I2C Bus not found : " + path ) ;
+                case Errno.ENOENT : throw new FileNotFoundException( "I2C Bus not found : " + path ) ;
 
-                case Errno.ENOENT : throw new FileNotFoundException( "Permission denied : " + path ) ;
+                case Errno.EACCES : throw new FileNotFoundException( "Permission denied : " + path ) ;
 
                 default           : throw new IOException( "Native error while opening I2C bus : errno " + errno ) ;
             }
